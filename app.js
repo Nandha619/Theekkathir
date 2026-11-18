@@ -2,7 +2,7 @@
 (function () {
   'use strict';
   var $ = function (s) { return document.querySelector(s); };
-  $('#ver').textContent = 'v9';
+  $('#ver').textContent = 'v10';
   var FONT = '"Noto Sans Tamil","Latha","Nirmala UI","Tamil Sangam MN","Noto Sans",system-ui,sans-serif';
 
   /* ───────────── config / brand ───────────── */
@@ -29,7 +29,7 @@
     { id: 4, name: 'Green', W: 1080, H: 1080, f: [['date', 'Date', 1], ['district', 'Place / இடம்', 1], ['badge', 'Tag (Breaking News…) – blank to hide', 1], ['headline', 'Title', 2], ['p1', 'Script 1', 5], ['p2', 'Script 2 (green)', 5]], ph: ['Photo'] }
   ];
   function today() { var d = new Date(), m = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC']; return ('0' + d.getDate()).slice(-2) + '-' + m[d.getMonth()] + '-' + d.getFullYear(); }
-  function blank() { return { date: today(), headline: '', cap: '', sub: '', body: '', p1: '', p2: '', badge: 'பிரேக்கிங் நியூஸ்', district: '', by: '' }; }
+  function blank() { return { date: today(), headline: '', cap: '', sub: '', body: '', p1: '', p2: '', badge: 'பிரேக்கிங் நியூஸ்', district: '', by: '', fade: 45 }; }
   var admin = false, editing = null, PW = '', cur = 0, T = {}, PH = {}, active = 0;   /* T[tplId] = texts, PH[tplId] = [{img,x,y,z}] */
   function txt() { return T[TPL[cur].id] || (T[TPL[cur].id] = blank()); }
   function phs() { var id = TPL[cur].id; return PH[id] || (PH[id] = TPL[cur].ph.map(function () { return { img: null, x: 0, y: 0, z: 1 }; })); }
@@ -206,9 +206,17 @@
     g.fillStyle = '#1b5f9f'; setF('800', 28); g.textAlign = 'left'; g.textBaseline = 'middle'; g.fillText(t.date || '', 96, 34);
     g.fillStyle = BL; rr(58, 54, 953, 910, 38); g.fill(); photo(0, 66, 62, 937, 894, 32);
     tag(58, 974, 50, 700, t.badge);
-    g.fillStyle = 'rgba(255,255,255,.93)'; rr(70, 708, 930, 240, 30); g.fill(); g.lineWidth = 4; g.strokeStyle = BL; rr(76, 714, 918, 228, 26); g.stroke();
-    block(t.headline, { x: 90, y: 720, w: 890, h: 66 }, { wt: '800', max: 46, min: 22, lh: 1.12, valign: 'm', align: 'c', color: '#0d2c52' });
-    block(t.body, { x: 92, y: 790, w: 886, h: 146 }, { wt: '700', max: 30, min: 15, lh: 1.26, valign: 'm', align: 'c', color: '#12365e', justify: true });
+    /* no white box: black fade rises from the bottom of the photo, script is written on it */
+    var PX = 66, PY = 62, PW = 937, PH = 894, fh = PH * Math.max(20, Math.min(90, +t.fade || 45)) / 100;
+    var gr = g.createLinearGradient(0, PY + PH, 0, PY + PH - fh);
+    gr.addColorStop(0, 'rgba(0,0,0,.94)'); gr.addColorStop(.55, 'rgba(0,0,0,.72)'); gr.addColorStop(1, 'rgba(0,0,0,0)');
+    g.save(); rr(PX, PY, PW, PH, 32); g.clip(); g.fillStyle = gr; g.fillRect(PX, PY + PH - fh, PW, fh); g.restore();
+    var hasH = String(t.headline || '').trim(), hasB = String(t.body || '').trim(), hh = hasH ? 66 : 0, gp = hasH && hasB ? 14 : 0, bs = 15, bl = [], bH = 0, bot = PY + PH - 30, avail = fh * .8;
+    if (hasB) for (bs = 32; bs >= 15; bs--) { setF('700', bs); bl = lines(hasB, 880); bH = bl.length * bs * 1.26; if (bH <= avail - hh - gp) break; }
+    g.save(); g.shadowColor = 'rgba(0,0,0,.65)'; g.shadowBlur = 6;
+    if (hasB) { setF('700', bs); put(bl, 100, bot - bH, 880, bs, 1.26, { align: 'c', color: '#fff', justify: true }); }
+    if (hasH) block(hasH, { x: 100, y: bot - bH - gp - hh, w: 880, h: hh }, { wt: '800', max: 46, min: 22, lh: 1.12, valign: 'm', align: 'c', color: '#fff' });
+    g.restore();
     brand(540, 3, 48); place(984, 14, 38, 320, t.district, BL, '#fff');
     footer(1036, 44, '#17406e', '', '#17406e', '#e3f0fa', 23);
   }
@@ -256,6 +264,11 @@
       if (x[0] === 'date') { var tb = document.createElement('button'); tb.type = 'button'; tb.className = 'alt'; tb.textContent = '📅 Today'; tb.onclick = function () { t.date = today(); i.value = t.date; saveTxt(); draw(); }; l.appendChild(tb); }
       f.appendChild(l);
     });
+    if (d.id === 3) {
+      var fl = document.createElement('label'), fv = document.createElement('span'), rg = document.createElement('input'); fl.textContent = 'Black fade height (drag) · ';
+      rg.type = 'range'; rg.min = 20; rg.max = 90; rg.step = 1; rg.value = t.fade || 45; fv.textContent = rg.value + '%'; fl.appendChild(fv); fl.appendChild(rg);
+      rg.oninput = function () { t.fade = +rg.value; fv.textContent = rg.value + '%'; saveTxt(); draw(); }; f.appendChild(fl);
+    }
     d.ph.forEach(function (nm, k) {
       var w = document.createElement('div'); w.className = 'slot' + (k === active ? ' on' : '');
       var l = document.createElement('label'); l.className = 'file'; l.textContent = '📷 ' + nm; var inp = document.createElement('input'); inp.type = 'file'; inp.accept = 'image/*'; inp.hidden = true;
@@ -411,5 +424,5 @@
 
   loadBrand(); loadTxt(); buildTabs(); buildForm(); draw();
   if (document.fonts && document.fonts.load) { Promise.all(['500', '700', '800', '900'].map(function (w) { return document.fonts.load(w + ' 30px "Noto Sans Tamil"', 'தமிழ் Abc'); })).then(draw, function () {}); document.fonts.ready.then(draw); }
-  $('#ver').textContent = 'v9 ✔';
+  $('#ver').textContent = 'v10 ✔';
 })();
