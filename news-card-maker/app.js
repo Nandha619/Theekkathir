@@ -15,7 +15,7 @@
   var B = { name: '', handle: '', site: '', logo: '', owner: '', fc: '#000000', fs: 0.9, fh: 0.42 }, logoImg = null;
   function applyBrand(o) {
     if (!o) return; Object.keys(B).forEach(function (k) { if (o[k] != null) B[k] = o[k]; });
-    logoImg = null; if (B.logo) { var i = new Image(); i.onload = function () { logoImg = i; draw(); }; i.src = B.logo; }
+    logoImg = null; { var i = new Image(); i.onload = function () { logoImg = i; draw(); }; i.src = B.logo || 'logo.png'; }
     var y = new Date().getFullYear(); $('#copy').textContent = '© ' + y + ' ' + (B.owner || B.name || 'All rights reserved') + '. All rights reserved.';
   }
   function loadBrand() {
