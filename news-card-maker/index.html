@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="ta">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#1b1f2a">
+<meta name="robots" content="noindex">
+<title>News Card Maker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Tamil:wght@500;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ============ PUBLIC: editor + submit only ============ -->
+<main id="pub" data-sec="text">
+  <header class="top"><b>News Card Maker</b><span class="sp"></span><span class="tag">Edit</span></header>
+  <div class="ws">
+    <section class="viewer">
+      <div class="vbar"><span>Viewer</span><em id="vname"></em></div>
+      <div class="vwrap"><div class="phone"><i class="notch"></i><div class="stage screen"><canvas id="cv" aria-label="Card preview"></canvas></div></div></div>
+      <p class="hint">Drag a photo on the card to move it · pinch or use the slider to zoom</p>
+      <nav id="tabs" class="tabs" aria-label="Templates"></nav>
+    </section>
+    <aside class="insp">
+      <nav class="itabs" aria-label="Inspector">
+        <button type="button" data-sec="text" aria-pressed="true">Text</button>
+        <button type="button" data-sec="photo" aria-pressed="false">Photo</button>
+        <button type="button" data-sec="fade" aria-pressed="false" id="itFade">Fade</button>
+        <button type="button" data-sec="deliver" aria-pressed="false">Deliver</button>
+      </nav>
+      <section class="isec" data-s="text"><h3>Text</h3><div id="fields"></div></section>
+      <section class="isec" data-s="photo"><h3>Photo</h3><div id="slots" class="slots"></div><div id="zoomRow" class="zoom" hidden><span>Zoom</span><input id="zoom" type="range" min="1" max="4" step="0.01" value="1"></div></section>
+      <section class="isec" data-s="fade" id="secFade" hidden><h3>Fade</h3><div id="fadeBox"></div></section>
+      <section class="isec" data-s="deliver"><h3>Deliver</h3>
+        <label>Your name (optional)<input id="sname" maxlength="80" autocomplete="name"></label>
+        <label class="chk"><input id="own" type="checkbox"><span>I confirm that I own, or have permission to use, the text and photos in this card, and I allow it to be reviewed and published.</span></label>
+        <button id="bSub" class="pri" type="button">➤ Submit</button>
+        <p id="msg" class="msg" role="status"></p>
+        <button id="bNew" class="alt wide" type="button" hidden>＋ Make another card</button>
+      </section>
+    </aside>
+  </div>
+</main>
+
+<!-- ============ ADMIN LOGIN ============ -->
+<section id="alogin" class="login" hidden>
+  <form id="lf" class="lbox" autocomplete="on">
+    <div class="lmark">🔒</div>
+    <h1>Admin sign in</h1>
+    <label>User name<input id="lu" name="username" autocomplete="username" autocapitalize="off" spellcheck="false" required></label>
+    <label>Password<input id="lp" name="password" type="password" autocomplete="current-password" required></label>
+    <button class="pri" type="submit">Sign in</button>
+    <p id="lm" class="err" role="alert"></p>
+    <a class="lnk" href="#" onclick="location.hash='';return false">← Back to editor</a>
+  </form>
+</section>
+
+<!-- ============ ADMIN ============ -->
+<main id="adm" hidden>
+  <header class="top"><b>Admin</b><span class="sp"></span><button id="bBack" class="ic" type="button">Editor</button><button id="bOut" class="ic" type="button">Sign out</button></header>
+  <nav class="tabs two mob"><button type="button" data-tab="subs" aria-pressed="true">Submitted cards</button><button type="button" data-tab="brand" aria-pressed="false">Brand &amp; fade</button></nav>
+  <div class="ws">
+    <section id="tSubs" class="viewer">
+      <div class="vbar"><span>Viewer</span><em id="avname">No card selected</em><button id="refresh" class="ic" type="button">↻ Refresh</button></div>
+      <div class="vwrap dsk"><div class="phone"><i class="notch"></i><div class="screen"><img id="aimg" alt=""></div></div></div>
+      <p id="smsg" class="msg"></p>
+      <div class="vbar pool"><span>Submitted cards</span></div>
+      <div id="grid" class="grid"></div>
+      <button id="more" class="alt wide" type="button" hidden>Load more</button>
+    </section>
+    <aside class="insp">
+      <section id="selCard" class="isec dsk"><h3>Selected card</h3>
+        <p id="selMeta" class="sub">Select a card from the list.</p>
+        <a id="selDl" class="btn pri" href="#" hidden>⬇ Download</a>
+        <button id="selRm" class="alt" type="button" hidden>🗑 Delete</button></section>
+      <section id="tBrand" class="isec panel" hidden><h3>Brand &amp; fade</h3>
+        <p class="sub">Used on every card, including the public editor.</p>
+        <label>Logo (wide logo, PNG with transparent background is best)
+          <div class="lrow"><span id="lprev" class="lprev"></span>
+            <label class="file">Choose<input id="lfile" type="file" accept="image/*" hidden></label>
+            <button id="lclr" class="alt" type="button">Remove</button></div></label>
+        <label>Brand name (shown as text if no logo)<input id="bn" maxlength="40"></label>
+        <label>Copyright holder<input id="bo" maxlength="60"></label>
+        <label>Social handle (footer, left)<input id="bh" maxlength="40"></label>
+        <label>Website (footer, right)<input id="bw" maxlength="60"></label>
+        <b class="sub">Default fade on the Blue card</b>
+        <label>Colour<input id="bfc" type="color"></label>
+        <label>Strength<input id="bfs" type="range" min="0" max="1" step="0.01"></label>
+        <label>Height<input id="bfh" type="range" min="0.3" max="0.8" step="0.01"></label>
+        <button id="aSave" class="pri" type="button">Save</button>
+        <p id="bmsg" class="msg"></p>
+      </section>
+    </aside>
+  </div>
+</main>
+
+<!-- ============ PAGE BAR (copyright + pages) ============ -->
+<footer id="pages" class="pages">
+  <span id="copy">© All rights reserved.</span>
+  <nav><button type="button" id="pgEdit" aria-pressed="true"><i>✎</i>Edit</button><button type="button" id="pgAdm" aria-pressed="false"><i>⚙</i>Admin</button></nav>
+  <a id="aLink" href="#admin">Admin</a>
+</footer>
+
+<script src="config.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
