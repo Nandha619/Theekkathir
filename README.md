@@ -31,6 +31,8 @@ A web page cannot block OS screenshots. So the public preview is covered with a 
 > For public use, set up the backend (section 1) so the password lives only on the server.
 
 **Admin → "Brand"**: change logo, social handle and website printed on the cards (saved on the admin's device).
+**v9:** Breaking-news tag now sits below the photo.
+**v8:** logo centred (no background) on every card · date + place at the top, above the photo · footer = social icons + "Theekkathir" (change in `config.js` HANDLE, or Admin → Brand).
 **Fixed in v7:** admin did not open / password failed because `API_URL` was empty and no server could verify it.
 ## Files
 `index.html` · `style.css` · `app.js` · `config.js` · `logo.js` · `logo.png` · `backend/Code.gs` · `.nojekyll`

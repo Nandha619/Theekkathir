@@ -2,7 +2,7 @@
 (function () {
   'use strict';
   var $ = function (s) { return document.querySelector(s); };
-  $('#ver').textContent = 'v7';
+  $('#ver').textContent = 'v9';
   var FONT = '"Noto Sans Tamil","Latha","Nirmala UI","Tamil Sangam MN","Noto Sans",system-ui,sans-serif';
 
   /* ───────────── config / brand ───────────── */
@@ -23,10 +23,10 @@
   /* ───────────── state ───────────── */
   var TPL = [
     { id: 5, name: 'Daily', W: 1080, H: 1350, f: [['date', 'Date', 1], ['badge', 'Tag (Breaking News…) – blank to hide', 1], ['district', 'District / மாவட்டம்', 1], ['headline', 'Title', 2], ['body', 'Script', 10], ['by', 'Reporter (optional)', 1]], ph: ['Photo'] },
-    { id: 1, name: 'Red', W: 1080, H: 1080, f: [['date', 'Date', 1], ['badge', 'Tag (Breaking News…) – blank to hide', 1], ['headline', 'Title', 2], ['cap', 'Photo caption', 1], ['p1', 'Script 1', 5], ['p2', 'Script 2 (red)', 5]], ph: ['Main photo', 'Small photo'] },
-    { id: 2, name: 'Maroon', W: 1080, H: 1350, f: [['date', 'Date', 1], ['badge', 'Tag (Breaking News…) – blank to hide', 1], ['headline', 'Title', 2], ['sub', 'Sub title (bar)', 2], ['body', 'Script', 12]], ph: ['Top photo', 'Middle photo', 'Bottom photo'] },
-    { id: 3, name: 'Blue', W: 1080, H: 1080, f: [['date', 'Date', 1], ['badge', 'Tag (Breaking News…) – blank to hide', 1], ['headline', 'Title', 2], ['body', 'Script', 8]], ph: ['Photo'] },
-    { id: 4, name: 'Green', W: 1080, H: 1080, f: [['date', 'Date', 1], ['badge', 'Tag (Breaking News…) – blank to hide', 1], ['headline', 'Title', 2], ['p1', 'Script 1', 5], ['p2', 'Script 2 (green)', 5]], ph: ['Photo'] }
+    { id: 1, name: 'Red', W: 1080, H: 1080, f: [['date', 'Date', 1], ['district', 'Place / இடம்', 1], ['badge', 'Tag (Breaking News…) – blank to hide', 1], ['headline', 'Title', 2], ['cap', 'Photo caption', 1], ['p1', 'Script 1', 5], ['p2', 'Script 2 (red)', 5]], ph: ['Main photo', 'Small photo'] },
+    { id: 2, name: 'Maroon', W: 1080, H: 1350, f: [['date', 'Date', 1], ['district', 'Place / இடம்', 1], ['badge', 'Tag (Breaking News…) – blank to hide', 1], ['headline', 'Title', 2], ['sub', 'Sub title (bar)', 2], ['body', 'Script', 12]], ph: ['Top photo', 'Middle photo', 'Bottom photo'] },
+    { id: 3, name: 'Blue', W: 1080, H: 1080, f: [['date', 'Date', 1], ['district', 'Place / இடம்', 1], ['badge', 'Tag (Breaking News…) – blank to hide', 1], ['headline', 'Title', 2], ['body', 'Script', 8]], ph: ['Photo'] },
+    { id: 4, name: 'Green', W: 1080, H: 1080, f: [['date', 'Date', 1], ['district', 'Place / இடம்', 1], ['badge', 'Tag (Breaking News…) – blank to hide', 1], ['headline', 'Title', 2], ['p1', 'Script 1', 5], ['p2', 'Script 2 (green)', 5]], ph: ['Photo'] }
   ];
   function today() { var d = new Date(), m = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC']; return ('0' + d.getDate()).slice(-2) + '-' + m[d.getMonth()] + '-' + d.getFullYear(); }
   function blank() { return { date: today(), headline: '', cap: '', sub: '', body: '', p1: '', p2: '', badge: 'பிரேக்கிங் நியூஸ்', district: '', by: '' }; }
@@ -98,11 +98,17 @@
     } else { g.fillStyle = '#7b8794'; setF('800', Math.min(34, w / 6)); g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('+ ' + TPL[cur].ph[i], x + w / 2, y + h / 2); }
     g.restore();
   }
-  /* logo inside the card (right-aligned at rx) */
-  function brand(rx, y, h, plate) {
+  /* logo only (no background plate), centred on cx */
+  function brand(cx, y, h) {
     if (!logoImg) return; var w = h * logoImg.width / logoImg.height;
-    if (plate) { g.fillStyle = 'rgba(255,255,255,.96)'; rr(rx - w - 12, y - 10, w + 24, h + 20, 16); g.fill(); }
-    g.drawImage(logoImg, rx - w, y, w, h);
+    g.drawImage(logoImg, cx - w / 2, y, w, h);
+  }
+  /* place pill (pin + text), right edge at xr */
+  function place(xr, y, h, maxW, text, fill, fg) {
+    text = String(text || '').trim(); if (!text) return;
+    var sz = h * .56; setF('800', sz); var w = Math.min(maxW, g.measureText(text).width + h * 1.2 + 20), x = xr - w;
+    g.fillStyle = fill; rr(x, y, w, h, h * .22); g.fill(); pin(x + h * .5, y + h * .5, h * .2, fg, fill);
+    block(text, { x: x + h * .9, y: y, w: w - h * .9 - 12, h: h }, { wt: '800', max: sz, min: 14, lh: 1.1, valign: 'm', align: 'l', color: fg });
   }
   /* breaking-news tag (text editable; blank = hidden) */
   function tag(x, y, h, maxW, text) {
@@ -123,13 +129,15 @@
     return cx + s / 2;
   }
   function globe(cx, cy, r, c) { g.strokeStyle = c; g.lineWidth = r * .14; g.beginPath(); g.arc(cx, cy, r, 0, 7); g.stroke(); g.beginPath(); g.ellipse(cx, cy, r * .42, r, 0, 0, 7); g.stroke(); g.beginPath(); g.moveTo(cx - r, cy); g.lineTo(cx + r, cy); g.stroke(); g.beginPath(); g.moveTo(cx - r * .85, cy - r * .5); g.lineTo(cx + r * .85, cy - r * .5); g.moveTo(cx - r * .85, cy + r * .5); g.lineTo(cx + r * .85, cy + r * .5); g.stroke(); }
-  function footer(y, h, fg, bg, tc, iconBg, sz) {
-    /* left: icons + handle · right: globe + site */
-    if (!B.handle && !B.site) return;
-    var cy = y + h / 2, ex = icons(34, cy, h * .62, fg, iconBg);
-    g.fillStyle = tc; setF('800', sz); g.textAlign = 'left'; g.textBaseline = 'middle'; g.fillText(String(B.handle || '').toUpperCase(), ex + 16, cy + 1);
-    g.textAlign = 'right'; var sw = g.measureText(B.site || '').width; setF('800', sz + 2); sw = g.measureText(B.site || '').width; g.fillText(B.site || '', cv.width - 36, cy + 1);
-    globe(cv.width - 36 - sw - h * .42, cy, h * .3, tc);
+  function footer(y, h, fg, bg, tc, iconBg, sz, right) {
+    /* social icons + handle; website (or `right` text) on the right. No website -> centred */
+    var handle = String(B.handle || '').trim(), rt = right || String(B.site || '').trim();
+    if (!handle && !rt) return;
+    var cy = y + h / 2, s = h * .62, fs = rt ? sz : sz + 4; setF('800', fs);
+    var hw = g.measureText(handle).width, x0 = rt ? 34 : (cv.width - (s * 5.35 + (handle ? 16 + hw : 0))) / 2;
+    var ex = icons(x0, cy, s, fg, iconBg);
+    g.fillStyle = tc; setF('800', fs); g.textAlign = 'left'; g.textBaseline = 'middle'; g.fillText(handle, ex + 16, cy + 1);
+    if (rt) { g.textAlign = 'right'; setF('800', sz + 2); var sw = g.measureText(rt).width; g.fillText(rt, cv.width - 36, cy + 1); if (!right) globe(cv.width - 36 - sw - h * .42, cy, h * .3, tc); }
   }
   function datebox(x, y, w, h, fill, fg, sz, text) { if (fill) { g.fillStyle = fill; g.fillRect(x, y, w, h); } g.fillStyle = fg; setF('800', sz); g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(text || '', x + w / 2, y + h / 2 + 1); }
 
@@ -138,33 +146,29 @@
     g.fillStyle = c; g.beginPath(); g.arc(cx, cy - r * .3, r, Math.PI * .82, Math.PI * 2.18); g.lineTo(cx, cy + r * 1.3); g.closePath(); g.fill();
     g.fillStyle = hole; g.beginPath(); g.arc(cx, cy - r * .3, r * .38, 0, 7); g.fill();
   }
-  /* Daily — logo-centred template for every district */
+  /* Daily — logo centred inside the card, date + place directly above the photo */
   function t5(t) {
     var W = 1080, H = 1350, RED = '#c8102e', DK = '#8e0f1d';
     g.fillStyle = '#fbf3ee'; g.fillRect(0, 0, W, H);
-    var hg = g.createLinearGradient(0, 0, 0, 250); hg.addColorStop(0, '#d9182f'); hg.addColorStop(1, DK);
-    g.fillStyle = hg; g.fillRect(0, 0, W, 250);
-    var lh = 132, lw = logoImg ? lh * logoImg.width / logoImg.height : 368, px = (W - lw) / 2;
-    g.fillStyle = '#fff'; rr(px - 34, 34, lw + 68, lh + 44, 28); g.fill();
-    brand(px + lw, 56, lh);
-    datebox(60, 272, 240, 48, DK, '#fff', 26, t.date);
+    brand(W / 2, 26, 124);
+    g.fillStyle = RED; g.fillRect(60, 170, 10, 106);
+    block(t.headline, { x: 90, y: 164, w: 930, h: 120 }, { wt: '900', max: 54, min: 26, lh: 1.15, valign: 'm', align: 'l', color: '#7a0c18' });
+    datebox(60, 300, 240, 48, DK, '#fff', 26, t.date);
     var d = String(t.district || '').trim();
-    if (d) { g.fillStyle = RED; rr(316, 272, 704, 48, 10); g.fill(); pin(346, 297, 12, '#fff', RED); block(d, { x: 374, y: 272, w: 630, h: 48 }, { wt: '800', max: 30, min: 16, lh: 1.1, valign: 'm', align: 'l', color: '#fff' }); }
-    g.fillStyle = RED; g.fillRect(60, 344, 10, 106);
-    block(t.headline, { x: 90, y: 338, w: 930, h: 120 }, { wt: '900', max: 54, min: 26, lh: 1.15, valign: 'm', align: 'l', color: '#7a0c18' });
-    g.fillStyle = RED; rr(54, 476, 972, 408, 26); g.fill(); photo(0, 62, 484, 956, 392, 20);
-    tag(84, 506, 52, 640, t.badge);
+    if (d) { g.fillStyle = RED; rr(316, 300, 704, 48, 10); g.fill(); pin(346, 325, 12, '#fff', RED); block(d, { x: 374, y: 300, w: 630, h: 48 }, { wt: '800', max: 30, min: 16, lh: 1.1, valign: 'm', align: 'l', color: '#fff' }); }
+    g.fillStyle = RED; rr(54, 364, 972, 466, 26); g.fill(); photo(0, 62, 372, 956, 450, 20);
+    tag(54, 840, 52, 700, t.badge);
     g.fillStyle = '#fff'; rr(54, 904, 972, 372, 26); g.fill(); g.lineWidth = 3; g.strokeStyle = RED; g.stroke();
     block(t.body, { x: 86, y: 926, w: 908, h: 330 }, { wt: '600', max: 36, min: 16, lh: 1.34, valign: 't', align: 'l', color: '#241a22', justify: false });
     g.fillStyle = DK; g.fillRect(0, 1296, W, 54);
     var by = String(t.by || '').trim();
-    if (by) { g.fillStyle = '#fff'; setF('800', 26); g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('செய்தியாளர்: ' + by, W / 2, 1324); } else footer(1296, 54, '#fff', DK, '#fff', DK, 22);
+    footer(1296, 54, '#fff', DK, '#fff', DK, 22, by ? 'செய்தியாளர்: ' + by : '');
   }
   function t1(t) {
     var W = 1080, H = 1080, RED = '#b01a27', DK = '#8e111c';
     g.fillStyle = '#f6eee9'; g.fillRect(0, 0, W, H);
     datebox(70, 18, 195, 42, DK, '#fff', 25, t.date);
-    brand(1010, 8, 62);
+    brand(540, 10, 60); place(1005, 18, 42, 330, t.district, DK, '#fff');
     var hg = g.createLinearGradient(0, 80, 0, 175); hg.addColorStop(0, '#a3141f'); hg.addColorStop(1, '#7d0e18');
     g.fillStyle = hg; rr(70, 80, 935, 96, 28); g.fill(); g.lineWidth = 3; g.strokeStyle = '#cf3b46'; rr(72, 82, 931, 92, 26); g.stroke();
     g.fillStyle = '#fff'; block(t.headline, { x: 100, y: 88, w: 875, h: 80 }, { wt: '800', max: 52, min: 26, lh: 1.15, valign: 'm', align: 'c', color: '#fff' });
@@ -173,24 +177,22 @@
     photo(0, 70, 203, 937, 365, 30);
     var gr = g.createLinearGradient(0, 470, 0, 568); gr.addColorStop(0, 'rgba(0,0,0,0)'); gr.addColorStop(1, 'rgba(0,0,0,.72)');
     g.save(); rr(70, 203, 937, 365, 30); g.clip(); g.fillStyle = gr; g.fillRect(70, 470, 937, 98); g.restore();
-    tag(92, 224, 50, 640, t.badge);
+    tag(70, 592, 44, 740, t.badge);
     /* small photo */
     g.fillStyle = '#fff'; rr(838, 398, 182, 186, 34); g.fill(); g.fillStyle = RED; rr(843, 403, 172, 176, 30); g.fill();
     photo(1, 849, 409, 160, 164, 26);
     g.save(); g.shadowColor = 'rgba(0,0,0,.7)'; g.shadowBlur = 8; block(t.cap, { x: 90, y: 505, w: 735, h: 56 }, { wt: '800', max: 42, min: 22, lh: 1.1, valign: 'm', align: 'c', color: '#fff' }); g.restore();
-    pair(t.p1, t.p2, { x: 60, y: 600, w: 960, h: 420 }, { wt1: '600', wt2: '800', max: 36, min: 18, r2: 1.12, gap: .6, lh: 1.28, align: 'c', c1: '#222', c2: '#c1121f' });
+    pair(t.p1, t.p2, { x: 60, y: 646, w: 960, h: 378 }, { wt1: '600', wt2: '800', max: 36, min: 18, r2: 1.12, gap: .6, lh: 1.28, align: 'c', c1: '#222', c2: '#c1121f' });
     g.fillStyle = RED; g.fillRect(0, 1037, W, 43); footer(1037, 43, '#fff', RED, '#fff', RED, 22);
   }
   function t2(t) {
     var W = 1080, H = 1350, M = '#8a1a5e';
     g.fillStyle = '#f3eee4'; g.fillRect(0, 0, W, H);
     g.fillStyle = M; rr(12, 62, 448, 738, 10); g.fill(); photo(0, 18, 68, 436, 427, 5); photo(1, 18, 501, 436, 293, 5);
-    g.fillStyle = M; rr(12, 806, 448, 472, 10); g.fill(); photo(2, 18, 812, 436, 460, 5);
-    tag(32, 82, 44, 410, t.badge);
+    g.fillStyle = M; rr(12, 806, 448, 472, 10); g.fill(); photo(2, 18, 812, 436, 398, 5);
+    tag(24, 1222, 46, 424, t.badge);
     g.fillStyle = '#f7f2e8'; rr(474, 64, 560, 1206, 44); g.fill(); g.lineWidth = 3; g.strokeStyle = M; g.stroke();
-    g.fillStyle = '#f3eee4'; g.fillRect(512, 54, 200, 40); datebox(512, 44, 200, 40, '', M, 27, t.date);
-    g.fillStyle = M; g.fillRect(712, 62, 322, 3);
-    brand(1030, 4, 54);
+    datebox(12, 12, 210, 40, M, '#fff', 26, t.date); place(1034, 12, 40, 320, t.district, M, '#fff'); brand(540, 5, 52);
     g.save(); rr(474, 64, 560, 1206, 44); g.clip();
     block(t.headline, { x: 490, y: 104, w: 528, h: 56 }, { wt: '800', max: 34, min: 18, lh: 1.15, valign: 'm', align: 'c', color: M });
     g.fillStyle = M; g.fillRect(474, 160, 560, 50); block(t.sub, { x: 490, y: 160, w: 528, h: 50 }, { wt: '800', max: 34, min: 18, lh: 1.1, valign: 'm', align: 'c', color: '#fff' });
@@ -202,27 +204,25 @@
     var W = 1080, H = 1080, BL = '#1572d3';
     g.fillStyle = '#e3f0fa'; g.fillRect(0, 0, W, H);
     g.fillStyle = '#1b5f9f'; setF('800', 28); g.textAlign = 'left'; g.textBaseline = 'middle'; g.fillText(t.date || '', 96, 34);
-    g.fillStyle = BL; rr(58, 54, 953, 972, 38); g.fill(); photo(0, 66, 62, 937, 956, 32);
-    tag(92, 86, 54, 640, t.badge);
-    g.fillStyle = 'rgba(255,255,255,.93)'; rr(70, 770, 930, 240, 30); g.fill(); g.lineWidth = 4; g.strokeStyle = BL; rr(76, 776, 918, 228, 26); g.stroke();
-    block(t.headline, { x: 90, y: 782, w: 890, h: 66 }, { wt: '800', max: 46, min: 22, lh: 1.12, valign: 'm', align: 'c', color: '#0d2c52' });
-    block(t.body, { x: 92, y: 852, w: 886, h: 146 }, { wt: '700', max: 30, min: 15, lh: 1.26, valign: 'm', align: 'c', color: '#12365e', justify: true });
-    brand(982, 84, 56, true);
+    g.fillStyle = BL; rr(58, 54, 953, 910, 38); g.fill(); photo(0, 66, 62, 937, 894, 32);
+    tag(58, 974, 50, 700, t.badge);
+    g.fillStyle = 'rgba(255,255,255,.93)'; rr(70, 708, 930, 240, 30); g.fill(); g.lineWidth = 4; g.strokeStyle = BL; rr(76, 714, 918, 228, 26); g.stroke();
+    block(t.headline, { x: 90, y: 720, w: 890, h: 66 }, { wt: '800', max: 46, min: 22, lh: 1.12, valign: 'm', align: 'c', color: '#0d2c52' });
+    block(t.body, { x: 92, y: 790, w: 886, h: 146 }, { wt: '700', max: 30, min: 15, lh: 1.26, valign: 'm', align: 'c', color: '#12365e', justify: true });
+    brand(540, 3, 48); place(984, 14, 38, 320, t.district, BL, '#fff');
     footer(1036, 44, '#17406e', '', '#17406e', '#e3f0fa', 23);
   }
   function t4(t) {
     var W = 1080, H = 1080, TL = '#1f7a8c', TD = '#16596a';
     g.fillStyle = '#e8f1ea'; g.fillRect(0, 0, W, H);
     g.fillStyle = '#2b8a9a'; setF('800', 28); g.textAlign = 'left'; g.textBaseline = 'middle'; g.fillText(t.date || '', 76, 60);
-    g.fillStyle = TL; rr(40, 78, 1000, 506, 32); g.fill(); photo(0, 48, 86, 984, 490, 26);
-    tag(70, 108, 54, 700, t.badge);
-    brand(1030, 12, 60);
-    g.fillStyle = '#2b8a8a'; rr(52, 552, 976, 78, 10); g.fill();
-    block(t.headline, { x: 70, y: 552, w: 940, h: 78 }, { wt: '800', max: 44, min: 20, lh: 1.12, valign: 'm', align: 'c', color: '#fff' });
-    g.fillStyle = '#fff'; rr(30, 612, 1022, 412, 20); g.fill(); g.lineWidth = 3; g.strokeStyle = '#1c3d94'; g.stroke();
-    g.fillStyle = '#2b8a8a'; rr(52, 552, 976, 78, 10); g.fill();
-    block(t.headline, { x: 70, y: 552, w: 940, h: 78 }, { wt: '800', max: 44, min: 20, lh: 1.12, valign: 'm', align: 'c', color: '#fff' });
-    pair(t.p1, t.p2, { x: 60, y: 646, w: 962, h: 370 }, { wt1: '700', wt2: '700', max: 38, min: 18, r2: 1, gap: .7, lh: 1.26, align: 'c', c1: '#262626', c2: '#2a6e5a' });
+    g.fillStyle = TL; rr(40, 78, 1000, 442, 32); g.fill(); photo(0, 48, 86, 984, 426, 26);
+    tag(52, 530, 46, 700, t.badge);
+    brand(540, 6, 66); place(1004, 34, 40, 330, t.district, '#2b8a8a', '#fff');
+    g.fillStyle = '#fff'; rr(30, 644, 1022, 380, 20); g.fill(); g.lineWidth = 3; g.strokeStyle = '#1c3d94'; g.stroke();
+    g.fillStyle = '#2b8a8a'; rr(52, 584, 976, 78, 10); g.fill();
+    block(t.headline, { x: 70, y: 584, w: 940, h: 78 }, { wt: '800', max: 44, min: 20, lh: 1.12, valign: 'm', align: 'c', color: '#fff' });
+    pair(t.p1, t.p2, { x: 60, y: 678, w: 962, h: 338 }, { wt1: '700', wt2: '700', max: 38, min: 18, r2: 1, gap: .7, lh: 1.26, align: 'c', c1: '#262626', c2: '#2a6e5a' });
     footer(1036, 44, '#17454f', '', '#17454f', '#e8f1ea', 23);
   }
   var DRAW = [t5, t1, t2, t3, t4];
@@ -411,5 +411,5 @@
 
   loadBrand(); loadTxt(); buildTabs(); buildForm(); draw();
   if (document.fonts && document.fonts.load) { Promise.all(['500', '700', '800', '900'].map(function (w) { return document.fonts.load(w + ' 30px "Noto Sans Tamil"', 'தமிழ் Abc'); })).then(draw, function () {}); document.fonts.ready.then(draw); }
-  $('#ver').textContent = 'v7 ✔';
+  $('#ver').textContent = 'v9 ✔';
 })();
