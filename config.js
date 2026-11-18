@@ -1,6 +1,6 @@
 /* Fill these in — see README.md */
 window.CM_CONFIG = {
-  API_URL: '',   https://script.google.com/macros/s/AKfycbwqFjfnL6gwxQjkkCeEIfGlwSSO5lEkeDzIbJtcJ787DPRdYYsvf-OTK7vGaPD0dBYq4w/exec
+  API_URL: '',   /* Google Apps Script web-app URL (backend/Code.gs) */
   HANDLE: '',    /* social handle printed in the card footer (optional) */
   SITE: ''       /* website printed in the card footer (optional) */
 };
