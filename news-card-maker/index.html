@@ -5,10 +5,11 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#1b1f2a">
 <meta name="robots" content="noindex">
-<title>News Card Maker</title>
+<title>தீக்கதிர் – செய்தி அட்டை</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Tamil:wght@500;700;800;900&display=swap" rel="stylesheet">
+<link rel="icon" href="logo.png" type="image/png">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -34,9 +35,18 @@
       <section class="isec" data-s="photo"><h3>Photo</h3><div id="slots" class="slots"></div><div id="zoomRow" class="zoom" hidden><span>Zoom</span><input id="zoom" type="range" min="1" max="4" step="0.01" value="1"></div></section>
       <section class="isec" data-s="fade" id="secFade" hidden><h3>Fade</h3><div id="fadeBox"></div></section>
       <section class="isec" data-s="deliver"><h3>Deliver</h3>
-        <label>Your name (optional)<input id="sname" maxlength="80" autocomplete="name"></label>
-        <label class="chk"><input id="own" type="checkbox"><span>I confirm that I own, or have permission to use, the text and photos in this card, and I allow it to be reviewed and published.</span></label>
-        <button id="bSub" class="pri" type="button">➤ Submit</button>
+        <div id="subBox" class="stack">
+          <label>Your name (optional)<input id="sname" maxlength="80" autocomplete="name"></label>
+          <label class="chk"><input id="own" type="checkbox"><span>I confirm that I own, or have permission to use, the text and photos in this card, and I allow it to be reviewed and published.</span></label>
+          <button id="bSub" class="pri" type="button">➤ Submit</button>
+        </div>
+        <div id="barAdm" class="stack" hidden>
+          <p class="sub">Admin editing — no watermark on the downloaded card.</p>
+          <button id="bSave" class="pri" type="button">Save correction</button>
+          <button id="bDl" class="alt" type="button">⬇ Download</button>
+          <button id="bDel" class="alt" type="button">🗑 Delete</button>
+          <button id="bList" class="alt" type="button">← Back to list</button>
+        </div>
         <p id="msg" class="msg" role="status"></p>
         <button id="bNew" class="alt wide" type="button" hidden>＋ Make another card</button>
       </section>
@@ -73,6 +83,7 @@
     <aside class="insp">
       <section id="selCard" class="isec dsk"><h3>Selected card</h3>
         <p id="selMeta" class="sub">Select a card from the list.</p>
+        <button id="selEdit" class="alt" type="button" hidden>✎ Edit / correct</button>
         <a id="selDl" class="btn pri" href="#" hidden>⬇ Download</a>
         <button id="selRm" class="alt" type="button" hidden>🗑 Delete</button></section>
       <section id="tBrand" class="isec panel" hidden><h3>Brand &amp; fade</h3>
@@ -102,6 +113,10 @@
   <nav><button type="button" id="pgEdit" aria-pressed="true"><i>✎</i>Edit</button><button type="button" id="pgAdm" aria-pressed="false"><i>⚙</i>Admin</button></nav>
   <a id="aLink" href="#admin">Admin</a>
 </footer>
+
+<datalist id="badges"><option value="பிரேக்கிங் நியூஸ்"><option value="BREAKING NEWS"><option value="சிறப்புச் செய்தி"><option value="இன்றைய செய்தி"><option value="முக்கியச் செய்தி"><option value="LATEST"></datalist>
+
+<datalist id="districts"><option value="அரியலூர்"><option value="செங்கல்பட்டு"><option value="சென்னை"><option value="கோயம்புத்தூர்"><option value="கடலூர்"><option value="தர்மபுரி"><option value="திண்டுக்கல்"><option value="ஈரோடு"><option value="கள்ளக்குறிச்சி"><option value="காஞ்சிபுரம்"><option value="கன்னியாகுமரி"><option value="கரூர்"><option value="கிருஷ்ணகிரி"><option value="மதுரை"><option value="மயிலாடுதுறை"><option value="நாகப்பட்டினம்"><option value="நாமக்கல்"><option value="நீலகிரி"><option value="பெரம்பலூர்"><option value="புதுக்கோட்டை"><option value="இராமநாதபுரம்"><option value="ராணிப்பேட்டை"><option value="சேலம்"><option value="சிவகங்கை"><option value="தென்காசி"><option value="தஞ்சாவூர்"><option value="தேனி"><option value="திருப்பத்தூர்"><option value="திருவள்ளூர்"><option value="திருவாரூர்"><option value="தூத்துக்குடி"><option value="திருச்சிராப்பள்ளி"><option value="திருநெல்வேலி"><option value="திருப்பூர்"><option value="திருவண்ணாமலை"><option value="வேலூர்"><option value="விழுப்புரம்"><option value="விருதுநகர்"></datalist>
 
 <script src="config.js"></script>
 <script src="app.js"></script>
