@@ -2,7 +2,7 @@
 (function () {
   'use strict';
   var $ = function (s) { return document.querySelector(s); };
-  $('#ver').textContent = 'v5';
+  $('#ver').textContent = 'v6';
   var FONT = '"Noto Sans Tamil","Latha","Nirmala UI","Tamil Sangam MN","Noto Sans",system-ui,sans-serif';
 
   /* ───────────── config / brand ───────────── */
@@ -15,13 +15,14 @@
 
   /* ───────────── state ───────────── */
   var TPL = [
+    { id: 5, name: 'Daily', W: 1080, H: 1350, f: [['date', 'Date', 1], ['badge', 'Tag (Breaking News…) – blank to hide', 1], ['district', 'District / மாவட்டம்', 1], ['headline', 'Title', 2], ['body', 'Script', 10], ['by', 'Reporter (optional)', 1]], ph: ['Photo'] },
     { id: 1, name: 'Red', W: 1080, H: 1080, f: [['date', 'Date', 1], ['badge', 'Tag (Breaking News…) – blank to hide', 1], ['headline', 'Title', 2], ['cap', 'Photo caption', 1], ['p1', 'Script 1', 5], ['p2', 'Script 2 (red)', 5]], ph: ['Main photo', 'Small photo'] },
     { id: 2, name: 'Maroon', W: 1080, H: 1350, f: [['date', 'Date', 1], ['badge', 'Tag (Breaking News…) – blank to hide', 1], ['headline', 'Title', 2], ['sub', 'Sub title (bar)', 2], ['body', 'Script', 12]], ph: ['Top photo', 'Middle photo', 'Bottom photo'] },
     { id: 3, name: 'Blue', W: 1080, H: 1080, f: [['date', 'Date', 1], ['badge', 'Tag (Breaking News…) – blank to hide', 1], ['headline', 'Title', 2], ['body', 'Script', 8]], ph: ['Photo'] },
     { id: 4, name: 'Green', W: 1080, H: 1080, f: [['date', 'Date', 1], ['badge', 'Tag (Breaking News…) – blank to hide', 1], ['headline', 'Title', 2], ['p1', 'Script 1', 5], ['p2', 'Script 2 (green)', 5]], ph: ['Photo'] }
   ];
   function today() { var d = new Date(), m = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC']; return ('0' + d.getDate()).slice(-2) + '-' + m[d.getMonth()] + '-' + d.getFullYear(); }
-  function blank() { return { date: today(), headline: '', cap: '', sub: '', body: '', p1: '', p2: '', badge: 'பிரேக்கிங் நியூஸ்' }; }
+  function blank() { return { date: today(), headline: '', cap: '', sub: '', body: '', p1: '', p2: '', badge: 'பிரேக்கிங் நியூஸ்', district: '', by: '' }; }
   var admin = false, editing = null, PW = '', cur = 0, T = {}, PH = {}, active = 0;   /* T[tplId] = texts, PH[tplId] = [{img,x,y,z}] */
   function txt() { return T[TPL[cur].id] || (T[TPL[cur].id] = blank()); }
   function phs() { var id = TPL[cur].id; return PH[id] || (PH[id] = TPL[cur].ph.map(function () { return { img: null, x: 0, y: 0, z: 1 }; })); }
@@ -126,6 +127,32 @@
   function datebox(x, y, w, h, fill, fg, sz, text) { if (fill) { g.fillStyle = fill; g.fillRect(x, y, w, h); } g.fillStyle = fg; setF('800', sz); g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(text || '', x + w / 2, y + h / 2 + 1); }
 
   /* ───────────── templates ───────────── */
+  function pin(cx, cy, r, c, hole) {
+    g.fillStyle = c; g.beginPath(); g.arc(cx, cy - r * .3, r, Math.PI * .82, Math.PI * 2.18); g.lineTo(cx, cy + r * 1.3); g.closePath(); g.fill();
+    g.fillStyle = hole; g.beginPath(); g.arc(cx, cy - r * .3, r * .38, 0, 7); g.fill();
+  }
+  /* Daily — logo-centred template for every district */
+  function t5(t) {
+    var W = 1080, H = 1350, RED = '#c8102e', DK = '#8e0f1d';
+    g.fillStyle = '#fbf3ee'; g.fillRect(0, 0, W, H);
+    var hg = g.createLinearGradient(0, 0, 0, 250); hg.addColorStop(0, '#d9182f'); hg.addColorStop(1, DK);
+    g.fillStyle = hg; g.fillRect(0, 0, W, 250);
+    var lh = 132, lw = logoImg ? lh * logoImg.width / logoImg.height : 368, px = (W - lw) / 2;
+    g.fillStyle = '#fff'; rr(px - 34, 34, lw + 68, lh + 44, 28); g.fill();
+    brand(px + lw, 56, lh);
+    datebox(60, 272, 240, 48, DK, '#fff', 26, t.date);
+    var d = String(t.district || '').trim();
+    if (d) { g.fillStyle = RED; rr(316, 272, 704, 48, 10); g.fill(); pin(346, 297, 12, '#fff', RED); block(d, { x: 374, y: 272, w: 630, h: 48 }, { wt: '800', max: 30, min: 16, lh: 1.1, valign: 'm', align: 'l', color: '#fff' }); }
+    g.fillStyle = RED; g.fillRect(60, 344, 10, 106);
+    block(t.headline, { x: 90, y: 338, w: 930, h: 120 }, { wt: '900', max: 54, min: 26, lh: 1.15, valign: 'm', align: 'l', color: '#7a0c18' });
+    g.fillStyle = RED; rr(54, 476, 972, 408, 26); g.fill(); photo(0, 62, 484, 956, 392, 20);
+    tag(84, 506, 52, 640, t.badge);
+    g.fillStyle = '#fff'; rr(54, 904, 972, 372, 26); g.fill(); g.lineWidth = 3; g.strokeStyle = RED; g.stroke();
+    block(t.body, { x: 86, y: 926, w: 908, h: 330 }, { wt: '600', max: 36, min: 16, lh: 1.34, valign: 't', align: 'l', color: '#241a22', justify: false });
+    g.fillStyle = DK; g.fillRect(0, 1296, W, 54);
+    var by = String(t.by || '').trim();
+    if (by) { g.fillStyle = '#fff'; setF('800', 26); g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('செய்தியாளர்: ' + by, W / 2, 1324); } else footer(1296, 54, '#fff', DK, '#fff', DK, 22);
+  }
   function t1(t) {
     var W = 1080, H = 1080, RED = '#b01a27', DK = '#8e111c';
     g.fillStyle = '#f6eee9'; g.fillRect(0, 0, W, H);
@@ -191,7 +218,7 @@
     pair(t.p1, t.p2, { x: 60, y: 646, w: 962, h: 370 }, { wt1: '700', wt2: '700', max: 38, min: 18, r2: 1, gap: .7, lh: 1.26, align: 'c', c1: '#262626', c2: '#2a6e5a' });
     footer(1036, 44, '#17454f', '', '#17454f', '#e8f1ea', 23);
   }
-  var DRAW = [t1, t2, t3, t4];
+  var DRAW = [t5, t1, t2, t3, t4];
 
   function mark() {
     var W = cv.width, H = cv.height, R = Math.hypot(W, H) / 2, label = '© தீக்கதிர் • பதிப்புரிமை';
@@ -218,6 +245,7 @@
       var l = document.createElement('label'); l.textContent = x[1]; var i = document.createElement(x[2] > 1 ? 'textarea' : 'input'); if (x[2] > 1) i.rows = Math.min(x[2], 8); i.value = t[x[0]] || '';
       i.oninput = function () { t[x[0]] = i.value; saveTxt(); draw(); }; l.appendChild(i);
       if (x[0] === 'badge') i.setAttribute('list', 'badges');
+      if (x[0] === 'district') i.setAttribute('list', 'districts');
       if (x[0] === 'date') { var tb = document.createElement('button'); tb.type = 'button'; tb.className = 'alt'; tb.textContent = '📅 Today'; tb.onclick = function () { t.date = today(); i.value = t.date; saveTxt(); draw(); }; l.appendChild(tb); }
       f.appendChild(l);
     });
@@ -326,5 +354,5 @@
 
   loadTxt(); buildTabs(); buildForm(); draw();
   if (document.fonts && document.fonts.load) { Promise.all(['500', '700', '800', '900'].map(function (w) { return document.fonts.load(w + ' 30px "Noto Sans Tamil"', 'தமிழ் Abc'); })).then(draw, function () {}); document.fonts.ready.then(draw); }
-  $('#ver').textContent = 'v5 ✔';
+  $('#ver').textContent = 'v6 ✔';
 })();
