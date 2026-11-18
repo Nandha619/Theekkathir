@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Tamil:wght@500;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=3">
+<link rel="stylesheet" href="style.css?v=5">
 </head>
 <body>
 <main id="app">
@@ -38,7 +38,7 @@
     <button id="bBack" class="alt" type="button">← List</button>
   </div>
   <p id="msg" class="msg" role="status"></p>
-  <p class="copy">© தீக்கதிர். எல்லா உரிமைகளும் பாதுகாக்கப்பட்டவை. அனுமதியின்றி நகலெடுத்தல், ஸ்க்ரீன்ஷாட் எடுத்தல், மறுபயன்பாடு தடை செய்யப்படுகிறது.</p>
+  <p class="copy">© தீக்கதிர். எல்லா உரிமைகளும் பாதுகாக்கப்பட்டவை. அனுமதியின்றி நகலெடுத்தல், ஸ்க்ரீன்ஷாட் எடுத்தல், மறுபயன்பாடு தடை செய்யப்படுகிறது. <span id="ver"></span></p>
 </main>
 
 <div id="adm" class="ov" hidden>
@@ -62,7 +62,9 @@
   </div>
 </div>
 
-<script src="config.js?v=3"></script>
-<script src="app.js?v=3"></script>
+<datalist id="badges"><option value="பிரேக்கிங் நியூஸ்"><option value="BREAKING NEWS"><option value="சிறப்புச் செய்தி"><option value="இன்றைய செய்தி"><option value="முக்கியச் செய்தி"><option value="LATEST"></datalist>
+
+<script src="config.js?v=5"></script>
+<script src="app.js?v=5"></script>
 </body>
 </html>

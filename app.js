@@ -2,10 +2,11 @@
 (function () {
   'use strict';
   var $ = function (s) { return document.querySelector(s); };
+  $('#ver').textContent = 'v5';
   var FONT = '"Noto Sans Tamil","Latha","Nirmala UI","Tamil Sangam MN","Noto Sans",system-ui,sans-serif';
 
   /* ───────────── config / brand ───────────── */
-  var CFG = window.CM_CONFIG || {}, HDR = 150, logoImg = null;
+  var CFG = window.CM_CONFIG || {}, HDR = 0, logoImg = null;
   var B = { handle: CFG.HANDLE || '', site: CFG.SITE || '' };
   (function () { var i = new Image(); i.onload = function () { logoImg = i; draw(); }; i.src = 'logo.png'; })();
   function shrink(file, max, cb) {
@@ -14,18 +15,18 @@
 
   /* ───────────── state ───────────── */
   var TPL = [
-    { id: 1, name: 'Red', W: 1080, H: 1080, f: [['date', 'Date', 1], ['headline', 'Title', 2], ['cap', 'Photo caption', 1], ['p1', 'Script 1', 5], ['p2', 'Script 2 (red)', 5]], ph: ['Main photo', 'Small photo'] },
-    { id: 2, name: 'Maroon', W: 1080, H: 1350, f: [['date', 'Date', 1], ['headline', 'Title', 2], ['sub', 'Sub title (bar)', 2], ['body', 'Script', 12]], ph: ['Top photo', 'Middle photo', 'Bottom photo'] },
-    { id: 3, name: 'Blue', W: 1080, H: 1080, f: [['date', 'Date', 1], ['headline', 'Title', 2], ['body', 'Script', 8]], ph: ['Photo'] },
-    { id: 4, name: 'Green', W: 1080, H: 1080, f: [['date', 'Date', 1], ['headline', 'Title', 2], ['p1', 'Script 1', 5], ['p2', 'Script 2 (green)', 5]], ph: ['Photo'] }
+    { id: 1, name: 'Red', W: 1080, H: 1080, f: [['date', 'Date', 1], ['badge', 'Tag (Breaking News…) – blank to hide', 1], ['headline', 'Title', 2], ['cap', 'Photo caption', 1], ['p1', 'Script 1', 5], ['p2', 'Script 2 (red)', 5]], ph: ['Main photo', 'Small photo'] },
+    { id: 2, name: 'Maroon', W: 1080, H: 1350, f: [['date', 'Date', 1], ['badge', 'Tag (Breaking News…) – blank to hide', 1], ['headline', 'Title', 2], ['sub', 'Sub title (bar)', 2], ['body', 'Script', 12]], ph: ['Top photo', 'Middle photo', 'Bottom photo'] },
+    { id: 3, name: 'Blue', W: 1080, H: 1080, f: [['date', 'Date', 1], ['badge', 'Tag (Breaking News…) – blank to hide', 1], ['headline', 'Title', 2], ['body', 'Script', 8]], ph: ['Photo'] },
+    { id: 4, name: 'Green', W: 1080, H: 1080, f: [['date', 'Date', 1], ['badge', 'Tag (Breaking News…) – blank to hide', 1], ['headline', 'Title', 2], ['p1', 'Script 1', 5], ['p2', 'Script 2 (green)', 5]], ph: ['Photo'] }
   ];
   function today() { var d = new Date(), m = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC']; return ('0' + d.getDate()).slice(-2) + '-' + m[d.getMonth()] + '-' + d.getFullYear(); }
-  function blank() { return { date: today(), headline: '', cap: '', sub: '', body: '', p1: '', p2: '', badge: 'NEWS UPDATE' }; }
+  function blank() { return { date: today(), headline: '', cap: '', sub: '', body: '', p1: '', p2: '', badge: 'பிரேக்கிங் நியூஸ்' }; }
   var admin = false, editing = null, PW = '', cur = 0, T = {}, PH = {}, active = 0;   /* T[tplId] = texts, PH[tplId] = [{img,x,y,z}] */
   function txt() { return T[TPL[cur].id] || (T[TPL[cur].id] = blank()); }
   function phs() { var id = TPL[cur].id; return PH[id] || (PH[id] = TPL[cur].ph.map(function () { return { img: null, x: 0, y: 0, z: 1 }; })); }
   function saveTxt() { try { localStorage.setItem('cm_text', JSON.stringify(T)); } catch (e) {} }
-  function loadTxt() { try { T = JSON.parse(localStorage.getItem('cm_text') || '{}') || {}; } catch (e) { T = {}; } }
+  function loadTxt() { try { T = JSON.parse(localStorage.getItem('cm_text') || '{}') || {}; } catch (e) { T = {}; } Object.keys(T).forEach(function (k) { if (T[k] && (T[k].badge === 'NEWS UPDATE' || T[k].badge == null)) T[k].badge = 'பிரேக்கிங் நியூஸ்'; }); }
 
   /* ───────────── drawing helpers ───────────── */
   var cv = $('#cv'), g = cv.getContext('2d'), HIT = [];
@@ -89,6 +90,20 @@
     } else { g.fillStyle = '#7b8794'; setF('800', Math.min(34, w / 6)); g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('+ ' + TPL[cur].ph[i], x + w / 2, y + h / 2); }
     g.restore();
   }
+  /* logo inside the card (right-aligned at rx) */
+  function brand(rx, y, h, plate) {
+    if (!logoImg) return; var w = h * logoImg.width / logoImg.height;
+    if (plate) { g.fillStyle = 'rgba(255,255,255,.96)'; rr(rx - w - 12, y - 10, w + 24, h + 20, 16); g.fill(); }
+    g.drawImage(logoImg, rx - w, y, w, h);
+  }
+  /* breaking-news tag (text editable; blank = hidden) */
+  function tag(x, y, h, maxW, text) {
+    text = String(text || '').trim(); if (!text) return;
+    var sz = h * .56; setF('900', sz); var w = Math.min(maxW, g.measureText(text).width + 46);
+    g.save(); g.shadowColor = 'rgba(0,0,0,.35)'; g.shadowBlur = 8; g.fillStyle = '#d90429'; rr(x, y, w, h, 10); g.fill(); g.restore();
+    g.lineWidth = 2.5; g.strokeStyle = '#fff'; rr(x + 2.5, y + 2.5, w - 5, h - 5, 8); g.stroke();
+    block(text, { x: x + 14, y: y, w: w - 28, h: h }, { wt: '900', max: sz, min: 14, lh: 1.05, valign: 'm', align: 'c', color: '#fff' });
+  }
   /* social icons + globe */
   function icons(x, y, s, fg, bg) {
     var d = s * 1.45, cx;
@@ -115,6 +130,7 @@
     var W = 1080, H = 1080, RED = '#b01a27', DK = '#8e111c';
     g.fillStyle = '#f6eee9'; g.fillRect(0, 0, W, H);
     datebox(70, 18, 195, 42, DK, '#fff', 25, t.date);
+    brand(1010, 8, 62);
     var hg = g.createLinearGradient(0, 80, 0, 175); hg.addColorStop(0, '#a3141f'); hg.addColorStop(1, '#7d0e18');
     g.fillStyle = hg; rr(70, 80, 935, 96, 28); g.fill(); g.lineWidth = 3; g.strokeStyle = '#cf3b46'; rr(72, 82, 931, 92, 26); g.stroke();
     g.fillStyle = '#fff'; block(t.headline, { x: 100, y: 88, w: 875, h: 80 }, { wt: '800', max: 52, min: 26, lh: 1.15, valign: 'm', align: 'c', color: '#fff' });
@@ -123,6 +139,7 @@
     photo(0, 70, 203, 937, 365, 30);
     var gr = g.createLinearGradient(0, 470, 0, 568); gr.addColorStop(0, 'rgba(0,0,0,0)'); gr.addColorStop(1, 'rgba(0,0,0,.72)');
     g.save(); rr(70, 203, 937, 365, 30); g.clip(); g.fillStyle = gr; g.fillRect(70, 470, 937, 98); g.restore();
+    tag(92, 224, 50, 640, t.badge);
     /* small photo */
     g.fillStyle = '#fff'; rr(838, 398, 182, 186, 34); g.fill(); g.fillStyle = RED; rr(843, 403, 172, 176, 30); g.fill();
     photo(1, 849, 409, 160, 164, 26);
@@ -135,9 +152,11 @@
     g.fillStyle = '#f3eee4'; g.fillRect(0, 0, W, H);
     g.fillStyle = M; rr(12, 62, 448, 738, 10); g.fill(); photo(0, 18, 68, 436, 427, 5); photo(1, 18, 501, 436, 293, 5);
     g.fillStyle = M; rr(12, 806, 448, 472, 10); g.fill(); photo(2, 18, 812, 436, 460, 5);
+    tag(32, 82, 44, 410, t.badge);
     g.fillStyle = '#f7f2e8'; rr(474, 64, 560, 1206, 44); g.fill(); g.lineWidth = 3; g.strokeStyle = M; g.stroke();
     g.fillStyle = '#f3eee4'; g.fillRect(512, 54, 200, 40); datebox(512, 44, 200, 40, '', M, 27, t.date);
     g.fillStyle = M; g.fillRect(712, 62, 322, 3);
+    brand(1030, 4, 54);
     g.save(); rr(474, 64, 560, 1206, 44); g.clip();
     block(t.headline, { x: 490, y: 104, w: 528, h: 56 }, { wt: '800', max: 34, min: 18, lh: 1.15, valign: 'm', align: 'c', color: M });
     g.fillStyle = M; g.fillRect(474, 160, 560, 50); block(t.sub, { x: 490, y: 160, w: 528, h: 50 }, { wt: '800', max: 34, min: 18, lh: 1.1, valign: 'm', align: 'c', color: '#fff' });
@@ -150,9 +169,11 @@
     g.fillStyle = '#e3f0fa'; g.fillRect(0, 0, W, H);
     g.fillStyle = '#1b5f9f'; setF('800', 28); g.textAlign = 'left'; g.textBaseline = 'middle'; g.fillText(t.date || '', 96, 34);
     g.fillStyle = BL; rr(58, 54, 953, 972, 38); g.fill(); photo(0, 66, 62, 937, 956, 32);
+    tag(92, 86, 54, 640, t.badge);
     g.fillStyle = 'rgba(255,255,255,.93)'; rr(70, 770, 930, 240, 30); g.fill(); g.lineWidth = 4; g.strokeStyle = BL; rr(76, 776, 918, 228, 26); g.stroke();
     block(t.headline, { x: 90, y: 782, w: 890, h: 66 }, { wt: '800', max: 46, min: 22, lh: 1.12, valign: 'm', align: 'c', color: '#0d2c52' });
     block(t.body, { x: 92, y: 852, w: 886, h: 146 }, { wt: '700', max: 30, min: 15, lh: 1.26, valign: 'm', align: 'c', color: '#12365e', justify: true });
+    brand(982, 84, 56, true);
     footer(1036, 44, '#17406e', '', '#17406e', '#e3f0fa', 23);
   }
   function t4(t) {
@@ -160,6 +181,8 @@
     g.fillStyle = '#e8f1ea'; g.fillRect(0, 0, W, H);
     g.fillStyle = '#2b8a9a'; setF('800', 28); g.textAlign = 'left'; g.textBaseline = 'middle'; g.fillText(t.date || '', 76, 60);
     g.fillStyle = TL; rr(40, 78, 1000, 506, 32); g.fill(); photo(0, 48, 86, 984, 490, 26);
+    tag(70, 108, 54, 700, t.badge);
+    brand(1030, 12, 60);
     g.fillStyle = '#2b8a8a'; rr(52, 552, 976, 78, 10); g.fill();
     block(t.headline, { x: 70, y: 552, w: 940, h: 78 }, { wt: '800', max: 44, min: 20, lh: 1.12, valign: 'm', align: 'c', color: '#fff' });
     g.fillStyle = '#fff'; rr(30, 612, 1022, 412, 20); g.fill(); g.lineWidth = 3; g.strokeStyle = '#1c3d94'; g.stroke();
@@ -178,10 +201,8 @@
   }
   function draw() {
     var d = TPL[cur]; if (cv.width !== d.W || cv.height !== d.H + HDR) { cv.width = d.W; cv.height = d.H + HDR; }
-    HIT = []; g.save(); g.clearRect(0, 0, cv.width, cv.height); g.fillStyle = '#fff'; g.fillRect(0, 0, cv.width, HDR);
-    if (logoImg) { var h = 120, w = h * logoImg.width / logoImg.height; g.drawImage(logoImg, (cv.width - w) / 2, (HDR - h) / 2 - 2, w, h); }
-    g.fillStyle = '#e0314b'; g.fillRect(0, HDR - 6, cv.width, 6);
-    g.save(); g.translate(0, HDR); DRAW[cur](txt()); g.restore();
+    HIT = []; g.save(); g.clearRect(0, 0, cv.width, cv.height);
+    DRAW[cur](txt());
     if (!admin) mark(); g.restore();
   }
 
@@ -196,6 +217,7 @@
     d.f.forEach(function (x) {
       var l = document.createElement('label'); l.textContent = x[1]; var i = document.createElement(x[2] > 1 ? 'textarea' : 'input'); if (x[2] > 1) i.rows = Math.min(x[2], 8); i.value = t[x[0]] || '';
       i.oninput = function () { t[x[0]] = i.value; saveTxt(); draw(); }; l.appendChild(i);
+      if (x[0] === 'badge') i.setAttribute('list', 'badges');
       if (x[0] === 'date') { var tb = document.createElement('button'); tb.type = 'button'; tb.className = 'alt'; tb.textContent = '📅 Today'; tb.onclick = function () { t.date = today(); i.value = t.date; saveTxt(); draw(); }; l.appendChild(tb); }
       f.appendChild(l);
     });
@@ -239,6 +261,7 @@
   $('#bDl').onclick = function () { if (!admin) return; blob(function (b) { var a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = fname(); document.body.appendChild(a); a.click(); a.remove(); setTimeout(function () { URL.revokeObjectURL(a.href); }, 4000); say('Downloaded ✔'); }); };
 
   /* ───────────── server (Google Apps Script) ───────────── */
+  function why() { return CFG.API_URL ? 'Cannot reach the server. In Apps Script: Deploy as Web app, access = Anyone.' : 'API_URL is empty in config.js'; }
   function api(b) {
     if (!CFG.API_URL) return Promise.reject(new Error('setup'));
     return fetch(CFG.API_URL, { method: 'POST', body: JSON.stringify(b) }).then(function (r) { return r.json(); });
@@ -262,7 +285,7 @@
     if (!String(txt().headline || '').trim()) { say('Please type a title first'); return; }
     var b = this; b.disabled = true; say('Submitting…');
     api({ action: 'submit', data: pack() }).then(function (r) { if (r.ok) { say('Submitted ✔ Thank you. Our team will review it.'); resetCur(); } else say('Could not submit. Please try again.'); })
-      .catch(function () { say('Submission service is not available right now.'); }).then(function () { b.disabled = false; });
+      .catch(function () { say(why()); }).then(function () { b.disabled = false; });
   };
 
   /* admin: password → list → edit / download / delete */
@@ -272,11 +295,11 @@
   function loadList() {
     $('#items').textContent = 'Loading…'; $('#am').textContent = '';
     return api({ action: 'list', password: PW }).then(function (r) {
-      if (!r.ok) { PW = ''; ses(''); panel(false); $('#am').textContent = r.error === 'auth' ? 'Wrong password' : 'Error'; return; }
+      if (!r.ok) { PW = ''; ses(''); panel(false); $('#am').textContent = r.error === 'auth' ? 'Wrong password' : r.error === 'nopw' ? 'ADMIN_PASSWORD is not set in Apps Script' : 'Error'; return; }
       ses(PW); panel(true); $('#apw').value = '';
       var n = $('#items'); n.textContent = r.items.length ? '' : 'No submissions yet';
       r.items.forEach(function (it) { var b = document.createElement('button'); b.type = 'button'; b.className = 'alt item'; b.textContent = (it.headline || '(no title)') + ' · ' + new Date(it.ts).toLocaleString(); b.onclick = function () { openItem(it.id); }; n.appendChild(b); });
-    }).catch(function () { panel(false); $('#am').textContent = 'Service not available'; });
+    }).catch(function () { panel(false); $('#am').textContent = why(); });
   }
   $('#bAdmin').onclick = function () { if (PW) { panel(true); loadList(); } else panel(false); };
   $('#aClose').onclick = $('#aClose2').onclick = function () { $('#adm').hidden = true; };
@@ -296,10 +319,12 @@
   function back() { editing = null; resetCur(); mode(false); say(''); panel(true); loadList(); }
 
   /* copyright protection (public view) */
-  ['contextmenu', 'dragstart', 'copy', 'selectstart'].forEach(function (ev) { document.addEventListener(ev, function (e) { if (!/^(INPUT|TEXTAREA)$/.test((e.target || {}).tagName || '')) e.preventDefault(); }); });
+  function onCard(e) { return !admin && e.target && e.target.closest && e.target.closest('.stage'); }
+  ['contextmenu', 'dragstart', 'copy'].forEach(function (ev) { document.addEventListener(ev, function (e) { if (onCard(e)) e.preventDefault(); }); });
   document.addEventListener('keydown', function (e) { if (admin) return; var k = (e.key || '').toLowerCase(); if ((e.ctrlKey || e.metaKey) && 's p u'.split(' ').indexOf(k) > -1) e.preventDefault(); });
   document.addEventListener('keyup', function (e) { if (e.key === 'PrintScreen' && !admin) { try { navigator.clipboard.writeText('© தீக்கதிர் — பதிப்புரிமை'); } catch (x) {} say('Screenshots are prohibited — © தீக்கதிர்'); } });
 
   loadTxt(); buildTabs(); buildForm(); draw();
   if (document.fonts && document.fonts.load) { Promise.all(['500', '700', '800', '900'].map(function (w) { return document.fonts.load(w + ' 30px "Noto Sans Tamil"', 'தமிழ் Abc'); })).then(draw, function () {}); document.fonts.ready.then(draw); }
+  $('#ver').textContent = 'v5 ✔';
 })();
