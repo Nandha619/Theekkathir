@@ -14,7 +14,7 @@
   /* ───────────── brand ───────────── */
   var B = { name: 'தீக்கதிர்', handle: 'Theekkathir', site: '', logo: '', owner: 'தீக்கதிர்', fc: '#000000', fs: 0.94, fh: 0.45 }, logoImg = null, HDR = 0;
   function applyBrand(o) {
-    if (!o) return; Object.keys(B).forEach(function (k) { if (o[k] != null) B[k] = o[k]; });
+    o = o || {}; Object.keys(B).forEach(function (k) { if (o[k] != null) B[k] = o[k]; });
     logoImg = null; { var i = new Image(); i.onload = function () { logoImg = i; draw(); }; i.src = B.logo || 'logo.png'; }
     var y = new Date().getFullYear(); $('#copy').textContent = '© ' + y + ' ' + (B.owner || B.name) + '. எல்லா உரிமைகளும் பாதுகாக்கப்பட்டவை. அனுமதியின்றி நகலெடுத்தல், ஸ்க்ரீன்ஷாட் எடுத்தல், மறுபயன்பாடு தடை செய்யப்படுகிறது.';
   }
@@ -33,7 +33,7 @@
     { id: 5, name: 'Daily', W: 1080, H: 1350, f: [['date', 'Date', 1], ['badge', 'Tag (Breaking News…) – blank to hide', 1], ['district', 'District / மாவட்டம்', 1], ['headline', 'Title', 2], ['body', 'Script', 10], ['by', 'Reporter (optional)', 1]], ph: ['Photo'] },
     { id: 1, name: 'Red', W: 1080, H: 1080, f: [['date', 'Date', 1], ['district', 'Place / இடம்', 1], ['badge', 'Tag (Breaking News…) – blank to hide', 1], ['headline', 'Title', 2], ['cap', 'Photo caption', 1], ['p1', 'Script 1', 5], ['p2', 'Script 2 (red)', 5]], ph: ['Main photo', 'Small photo'] },
     { id: 2, name: 'Maroon', W: 1080, H: 1350, f: [['date', 'Date', 1], ['district', 'Place / இடம்', 1], ['badge', 'Tag (Breaking News…) – blank to hide', 1], ['headline', 'Title', 2], ['sub', 'Sub title (bar)', 2], ['body', 'Script', 12]], ph: ['Top photo', 'Middle photo', 'Bottom photo'] },
-    { id: 3, name: 'Blue', W: 1080, H: 1080, f: [['date', 'Date', 1], ['district', 'Place / இடம்', 1], ['badge', 'Tag (Breaking News…) – blank to hide', 1], ['headline', 'Title', 2], ['body', 'Script', 8]], ph: ['Photo'], fade: true },
+    { id: 3, name: 'Blue', W: 1080, H: 1080, f: [['date', 'Date', 1], ['district', 'Place / இடம்', 1], ['headline', 'Title', 2], ['body', 'Script', 8]], ph: ['Photo'], fade: true },
     { id: 4, name: 'Green', W: 1080, H: 1080, f: [['date', 'Date', 1], ['district', 'Place / இடம்', 1], ['badge', 'Tag (Breaking News…) – blank to hide', 1], ['headline', 'Title', 2], ['p1', 'Script 1', 5], ['p2', 'Script 2 (green)', 5]], ph: ['Photo'] }
   ];
   function today() { var d = new Date(), m = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC']; return ('0' + d.getDate()).slice(-2) + '-' + m[d.getMonth()] + '-' + d.getFullYear(); }
@@ -211,9 +211,8 @@
     var W = 1080, H = 1080, BL = '#1572d3';
     g.fillStyle = '#e3f0fa'; g.fillRect(0, 0, W, H);
     g.fillStyle = '#1b5f9f'; setF('800', 28); g.textAlign = 'left'; g.textBaseline = 'middle'; g.fillText(t.date || '', 96, 34);
-    g.fillStyle = BL; rr(58, 54, 953, 910, 38); g.fill(); photo(0, 66, 62, 937, 894, 32);
-    tag(58, 974, 50, 700, t.badge);
-    var PX = 66, PY = 62, PW = 937, PH = 894, fh = PH * Math.max(.2, Math.min(.9, fv(t).h)); fadeLayer(t, PX, PY, PW, PH, fh);
+    g.fillStyle = BL; rr(58, 54, 953, 972, 38); g.fill(); photo(0, 66, 62, 937, 956, 32);
+    var PX = 66, PY = 62, PW = 937, PH = 956, fh = PH * Math.max(.2, Math.min(.9, fv(t).h)); fadeLayer(t, PX, PY, PW, PH, fh);
     var hasH = String(t.headline || '').trim(), hasB = String(t.body || '').trim(), hh = hasH ? 66 : 0, gp = hasH && hasB ? 14 : 0, bs = 15, bl = [], bH = 0, bot = PY + PH - 30, avail = fh * .8;
     if (hasB) for (bs = 32; bs >= 15; bs--) { setF('700', bs); bl = lines(hasB, 880); bH = bl.length * bs * 1.26; if (bH <= avail - hh - gp) break; }
     g.save(); g.shadowColor = 'rgba(0,0,0,.65)'; g.shadowBlur = 6;
