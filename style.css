@@ -52,3 +52,7 @@ body{-webkit-touch-callout:none}
 @media print{body{display:none!important}}
 
 .tabs{grid-template-columns:repeat(5,1fr);gap:6px}.tabs button{font-size:12px;padding:10px 2px}
+
+.brand{border:1.5px solid var(--line);border-radius:12px;padding:10px 12px}.brand summary{cursor:pointer;font-weight:800}.brand .stack{margin-top:10px}
+.lrow{display:flex;gap:10px;align-items:center}.lprev{width:56px;height:56px;border-radius:50%;background:#fff center/contain no-repeat;border:1.5px solid var(--line);flex:none}
+label.file{cursor:pointer;background:var(--panel);border:1.5px solid var(--line);border-radius:12px;padding:10px 14px;color:var(--ink)}

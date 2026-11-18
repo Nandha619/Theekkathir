@@ -2,15 +2,22 @@
 (function () {
   'use strict';
   var $ = function (s) { return document.querySelector(s); };
-  $('#ver').textContent = 'v6';
+  $('#ver').textContent = 'v7';
   var FONT = '"Noto Sans Tamil","Latha","Nirmala UI","Tamil Sangam MN","Noto Sans",system-ui,sans-serif';
 
   /* ───────────── config / brand ───────────── */
   var CFG = window.CM_CONFIG || {}, HDR = 0, logoImg = null;
-  var B = { handle: CFG.HANDLE || '', site: CFG.SITE || '' };
-  (function () { var i = new Image(); i.onload = function () { logoImg = i; draw(); }; i.src = 'logo.png'; })();
-  function shrink(file, max, cb) {
-    var fr = new FileReader(); fr.onload = function () { var i = new Image(); i.onload = function () { var k = Math.min(1, max / Math.max(i.width, i.height)), c = document.createElement('canvas'); c.width = Math.round(i.width * k); c.height = Math.round(i.height * k); c.getContext('2d').drawImage(i, 0, 0, c.width, c.height); cb(c.toDataURL('image/jpeg', .82), i); }; i.src = fr.result; }; fr.readAsDataURL(file);
+  var B = { handle: CFG.HANDLE || '', site: CFG.SITE || '', logo: '' };
+  function setLogo(d) {
+    B.logo = d || ''; var i = new Image();
+    i.onload = function () { logoImg = i; draw(); };
+    i.onerror = function () { if (B.logo) { B.logo = ''; setLogo(''); } };
+    i.src = B.logo || window.CM_LOGO || 'logo.png';
+  }
+  function loadBrand() { try { var o = JSON.parse(localStorage.getItem('cm_brand') || '{}'); ['handle', 'site', 'logo'].forEach(function (k) { if (o[k]) B[k] = o[k]; }); } catch (e) {} setLogo(B.logo); }
+  function saveBrand() { try { localStorage.setItem('cm_brand', JSON.stringify({ handle: B.handle, site: B.site, logo: B.logo })); return true; } catch (e) { return false; } }
+  function shrink(file, max, cb, type) {
+    var fr = new FileReader(); fr.onload = function () { var i = new Image(); i.onload = function () { var k = Math.min(1, max / Math.max(i.width, i.height)), c = document.createElement('canvas'); c.width = Math.round(i.width * k); c.height = Math.round(i.height * k); c.getContext('2d').drawImage(i, 0, 0, c.width, c.height); cb(c.toDataURL(type || 'image/jpeg', .82), i); }; i.src = fr.result; }; fr.readAsDataURL(file);
   }
 
   /* ───────────── state ───────────── */
@@ -289,9 +296,54 @@
   $('#bDl').onclick = function () { if (!admin) return; blob(function (b) { var a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = fname(); document.body.appendChild(a); a.click(); a.remove(); setTimeout(function () { URL.revokeObjectURL(a.href); }, 4000); say('Downloaded ✔'); }); };
 
   /* ───────────── server (Google Apps Script) ───────────── */
-  function why() { return CFG.API_URL ? 'Cannot reach the server. In Apps Script: Deploy as Web app, access = Anyone.' : 'API_URL is empty in config.js'; }
+  function why() { return 'Cannot reach the server. In Apps Script: Deploy as Web app, access = Anyone.'; }
+  /* ---- local mode (API_URL empty): works on this device, no server needed ---- */
+  function sha256(ascii) {
+    function rr(v, n) { return (v >>> n) | (v << (32 - n)); }
+    var mp = Math.pow, mw = mp(2, 32), i, j, result = '', words = [], abl, hash = [], k = [], pc = 0, ic = {};
+    ascii = unescape(encodeURIComponent(ascii)); abl = ascii.length * 8; ascii += '\x80';
+    for (var cand = 2; pc < 64; cand++) {
+      if (!ic[cand]) { for (i = 0; i < 313; i += cand) ic[i] = cand; hash[pc] = (mp(cand, .5) * mw) | 0; k[pc++] = (mp(cand, 1 / 3) * mw) | 0; }
+    }
+    hash = hash.slice(0, 8);
+    while (ascii.length % 64 - 56) ascii += '\x00';
+    for (i = 0; i < ascii.length; i++) { j = ascii.charCodeAt(i); words[i >> 2] |= j << ((3 - i) % 4) * 8; }
+    words[words.length] = (abl / mw) | 0; words[words.length] = abl;
+    for (j = 0; j < words.length;) {
+      var w = words.slice(j, j += 16), old = hash; hash = hash.slice(0, 8);
+      for (i = 0; i < 64; i++) {
+        var w15 = w[i - 15], w2 = w[i - 2], a = hash[0], e = hash[4];
+        var t1 = hash[7] + (rr(e, 6) ^ rr(e, 11) ^ rr(e, 25)) + ((e & hash[5]) ^ (~e & hash[6])) + k[i] + (w[i] = (i < 16) ? w[i] : (w[i - 16] + (rr(w15, 7) ^ rr(w15, 18) ^ (w15 >>> 3)) + w[i - 7] + (rr(w2, 17) ^ rr(w2, 19) ^ (w2 >>> 10))) | 0);
+        var t2 = (rr(a, 2) ^ rr(a, 13) ^ rr(a, 22)) + ((a & hash[1]) ^ (a & hash[2]) ^ (hash[1] & hash[2]));
+        hash = [(t1 + t2) | 0].concat(hash); hash[4] = (hash[4] + t1) | 0; hash.length = 8;
+      }
+      for (i = 0; i < 8; i++) hash[i] = (hash[i] + old[i]) | 0;
+    }
+    for (i = 0; i < 8; i++) for (j = 3; j + 1; j--) { var b = (hash[i] >> (j * 8)) & 255; result += (b < 16 ? 0 : '') + b.toString(16); }
+    return result;
+  }
+
+  var LOCAL_HASH = '578f83b6fe5a9dbebe2193cd0941fad3e0a6ab57ad8467ea78191293f70397d3';   /* sha256('cardmaker|theekkathir|<password>') */
+  function readSubs() { try { return JSON.parse(localStorage.getItem('cm_subs') || '[]') || []; } catch (e) { return []; } }
+  function writeSubs(a) { try { localStorage.setItem('cm_subs', JSON.stringify(a)); return true; } catch (e) { return false; } }
+  function localApi(b) {
+    var a = readSubs(), i, r;
+    function find() { for (i = 0; i < a.length; i++) if (a[i].id === b.id) return a[i]; return null; }
+    if (b.action === 'submit') {
+      var id = Math.random().toString(36).slice(2, 12);
+      a.push({ id: id, ts: new Date().toISOString(), tpl: b.data.tpl, headline: String((b.data.text || {}).headline || '').slice(0, 80), edited: false, data: b.data });
+      return { ok: writeSubs(a), error: 'full' };
+    }
+    if (sha256('cardmaker|theekkathir|' + (b.password || '')) !== LOCAL_HASH) return { ok: false, error: 'auth' };
+    if (b.action === 'list') return { ok: true, items: a.slice().sort(function (x, y) { return x.ts < y.ts ? 1 : -1; }).slice(0, 100).map(function (x) { return { id: x.id, ts: x.ts, tpl: x.tpl, headline: x.headline, edited: x.edited }; }) };
+    r = find(); if (!r) return { ok: false, error: 'missing' };
+    if (b.action === 'get') return { ok: true, data: r.data };
+    if (b.action === 'update') { r.data = b.data; r.headline = String((b.data.text || {}).headline || '').slice(0, 80); r.edited = true; return { ok: writeSubs(a) }; }
+    if (b.action === 'delete') { a.splice(a.indexOf(r), 1); return { ok: writeSubs(a) }; }
+    return { ok: false, error: 'bad' };
+  }
   function api(b) {
-    if (!CFG.API_URL) return Promise.reject(new Error('setup'));
+    if (!CFG.API_URL) return new Promise(function (res) { setTimeout(function () { res(localApi(b)); }, 150); });
     return fetch(CFG.API_URL, { method: 'POST', body: JSON.stringify(b) }).then(function (r) { return r.json(); });
   }
   function pack() { return { tpl: TPL[cur].id, text: txt(), photos: phs().map(function (p) { return p.src ? { d: p.src, x: p.x, y: p.y, z: p.z } : null; }) }; }
@@ -312,14 +364,14 @@
   $('#bSub').onclick = function () {
     if (!String(txt().headline || '').trim()) { say('Please type a title first'); return; }
     var b = this; b.disabled = true; say('Submitting…');
-    api({ action: 'submit', data: pack() }).then(function (r) { if (r.ok) { say('Submitted ✔ Thank you. Our team will review it.'); resetCur(); } else say('Could not submit. Please try again.'); })
+    api({ action: 'submit', data: pack() }).then(function (r) { if (r.ok) { say(CFG.API_URL ? 'Submitted ✔ Thank you. Our team will review it.' : 'Submitted ✔ (saved on this device)'); resetCur(); } else say(r.error === 'full' && !CFG.API_URL ? 'Storage full — ask admin to delete old submissions' : 'Could not submit. Please try again.'); })
       .catch(function () { say(why()); }).then(function () { b.disabled = false; });
   };
 
   /* admin: password → list → edit / download / delete */
   function ses(v) { try { if (v) sessionStorage.setItem('cm_pw', v); else sessionStorage.removeItem('cm_pw'); } catch (e) {} }
   try { PW = sessionStorage.getItem('cm_pw') || ''; } catch (e) {}
-  function panel(list) { $('#adm').hidden = false; $('#alogin').hidden = list; $('#alist').hidden = !list; }
+  function panel(list) { if (list) brandFill(); $('#adm').hidden = false; $('#alogin').hidden = list; $('#alist').hidden = !list; }
   function loadList() {
     $('#items').textContent = 'Loading…'; $('#am').textContent = '';
     return api({ action: 'list', password: PW }).then(function (r) {
@@ -329,6 +381,11 @@
       r.items.forEach(function (it) { var b = document.createElement('button'); b.type = 'button'; b.className = 'alt item'; b.textContent = (it.headline || '(no title)') + ' · ' + new Date(it.ts).toLocaleString(); b.onclick = function () { openItem(it.id); }; n.appendChild(b); });
     }).catch(function () { panel(false); $('#am').textContent = why(); });
   }
+  /* brand settings (logo / handle / website) — saved on this device */
+  function brandFill() { $('#bh').value = B.handle; $('#bw').value = B.site; $('#lprev').style.backgroundImage = 'url("' + (B.logo || window.CM_LOGO || 'logo.png') + '")'; }
+  $('#lfile').onchange = function () { var f = this.files[0]; if (!f) return; shrink(f, 360, function (u) { setLogo(u); $('#lprev').style.backgroundImage = 'url("' + u + '")'; }, 'image/png'); };
+  $('#lclr').onclick = function () { setLogo(''); $('#lprev').style.backgroundImage = 'url("' + (window.CM_LOGO || 'logo.png') + '")'; };
+  $('#aBrand').onclick = function () { B.handle = $('#bh').value.trim(); B.site = $('#bw').value.trim(); $('#am').textContent = saveBrand() ? 'Brand saved ✔' : 'Logo too large to save — try a smaller image'; draw(); };
   $('#bAdmin').onclick = function () { if (PW) { panel(true); loadList(); } else panel(false); };
   $('#aClose').onclick = $('#aClose2').onclick = function () { $('#adm').hidden = true; };
   $('#aRefresh').onclick = loadList;
@@ -352,7 +409,7 @@
   document.addEventListener('keydown', function (e) { if (admin) return; var k = (e.key || '').toLowerCase(); if ((e.ctrlKey || e.metaKey) && 's p u'.split(' ').indexOf(k) > -1) e.preventDefault(); });
   document.addEventListener('keyup', function (e) { if (e.key === 'PrintScreen' && !admin) { try { navigator.clipboard.writeText('© தீக்கதிர் — பதிப்புரிமை'); } catch (x) {} say('Screenshots are prohibited — © தீக்கதிர்'); } });
 
-  loadTxt(); buildTabs(); buildForm(); draw();
+  loadBrand(); loadTxt(); buildTabs(); buildForm(); draw();
   if (document.fonts && document.fonts.load) { Promise.all(['500', '700', '800', '900'].map(function (w) { return document.fonts.load(w + ' 30px "Noto Sans Tamil"', 'தமிழ் Abc'); })).then(draw, function () {}); document.fonts.ready.then(draw); }
-  $('#ver').textContent = 'v6 ✔';
+  $('#ver').textContent = 'v7 ✔';
 })();

@@ -20,5 +20,17 @@ Upload all files to a repository (root), then **Settings → Pages → Deploy fr
 ## Screenshot protection – what is and isn't possible
 A web page cannot block OS screenshots. So the public preview is covered with a repeating “© தீக்கதிர் • பதிப்புரிமை” watermark, right-click / copy / print / save shortcuts are disabled, and the clean card (no watermark) exists only in the password-protected admin view.
 
+## Admin sign-in — two modes (merged v7)
+
+| Mode | When | How the password works |
+|---|---|---|
+| **Local** | `API_URL` in `config.js` is empty (default) | Admin password is checked inside the page. Default password: **Admin@123**. Submissions are stored in *this browser only* (localStorage). Good for trying it out / single-device use. |
+| **Server** | `API_URL` filled with the Apps Script URL | Password is `ADMIN_PASSWORD` from Apps Script, checked on the server. Submissions from every visitor arrive in Drive. |
+
+> Local mode is a simple gate, not real security — anyone who reads the page source could find the hash.
+> For public use, set up the backend (section 1) so the password lives only on the server.
+
+**Admin → "Brand"**: change logo, social handle and website printed on the cards (saved on the admin's device).
+**Fixed in v7:** admin did not open / password failed because `API_URL` was empty and no server could verify it.
 ## Files
-`index.html` · `style.css` · `app.js` · `config.js` · `logo.png` · `backend/Code.gs` · `.nojekyll`
+`index.html` · `style.css` · `app.js` · `config.js` · `logo.js` · `logo.png` · `backend/Code.gs` · `.nojekyll`
