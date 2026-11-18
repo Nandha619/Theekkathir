@@ -1,0 +1,52 @@
+:root{--bg:#12151d;--panel:#1b1f2a;--line:#2c3243;--ink:#eef1f7;--mut:#9aa3b8;--acc:#e0314b;--on:#fff}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:500 15px/1.4 "Noto Sans Tamil",system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+[hidden]{display:none!important}
+button,input,textarea{font:inherit;color:inherit}
+.login{min-height:100vh;display:grid;place-items:center;padding:20px}
+.lbox{width:min(380px,100%);background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:26px 22px;display:grid;gap:12px;text-align:center}
+.lbox h1{margin:0;font-size:22px}.lbox p{margin:0;color:var(--mut)}
+.lmark{width:60px;height:60px;border-radius:50%;background:var(--acc);display:grid;place-items:center;font:900 30px/1 inherit;margin:0 auto 4px}
+label{display:grid;gap:6px;text-align:left;color:var(--mut);font-size:13px;font-weight:700}
+input[type=text],input[type=password],input:not([type]),textarea{width:100%;background:#12151d;border:1.5px solid var(--line);border-radius:12px;padding:11px 12px;color:var(--ink);font-size:16px}
+textarea{resize:vertical;min-height:84px}
+input:focus,textarea:focus{outline:none;border-color:var(--acc)}
+.err{color:#ff8a8a!important;min-height:20px}
+button{cursor:pointer;border:0;border-radius:12px;padding:12px 16px;font-weight:800}
+.pri{background:var(--acc);color:var(--on)}
+.alt{background:transparent;border:1.5px solid var(--line);color:var(--ink)}
+.ic{background:transparent;border:1.5px solid var(--line);padding:8px 12px;font-size:13px}
+main{max-width:640px;margin:0 auto;padding:0 14px 40px}
+.top{display:flex;align-items:center;gap:8px;padding:12px 0;position:sticky;top:0;background:var(--bg);z-index:5}
+.sp{flex:1}
+.tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:4px 0 12px}
+.tabs button{padding:10px 4px;background:var(--panel);border:1.5px solid var(--line);font-size:13px}
+.tabs button[aria-pressed=true]{background:var(--acc);border-color:transparent;color:var(--on)}
+.stage{background:#000;border-radius:14px;padding:0;overflow:hidden;touch-action:none;line-height:0}
+#cv{width:100%;height:auto;display:block;touch-action:none}
+.hint{color:var(--mut);font-size:12px;margin:8px 2px 12px;text-align:center}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:14px;display:grid;gap:12px}
+#fields{display:grid;gap:12px}
+.slots{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px}
+.slot{display:grid;gap:6px}
+.slot .file,.file{display:block;text-align:center;border:1.5px dashed var(--line);border-radius:12px;padding:11px 8px;cursor:pointer;font-weight:800;color:var(--ink);font-size:13px}
+.slot.on .file{border-color:var(--acc);border-style:solid}
+.zoom{display:flex;gap:10px;align-items:center;color:var(--mut);font-size:13px}.zoom input{flex:1}
+.bar{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px;position:sticky;bottom:0;padding:10px 0 calc(10px + env(safe-area-inset-bottom));background:linear-gradient(transparent,var(--bg) 30%)}
+.msg{text-align:center;color:var(--mut);font-size:13px;min-height:18px}
+.ov{position:fixed;inset:0;background:rgba(0,0,0,.65);display:grid;place-items:center;padding:16px;z-index:20;overflow:auto}
+.card{width:min(440px,100%);background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:18px;display:grid;gap:12px}
+.card h2{margin:0}.sub{margin:0;color:var(--mut);font-size:13px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:8px}.row2 .pri{grid-column:1/-1}
+.lrow{display:flex;gap:8px;align-items:center}
+.lprev{width:54px;height:54px;border-radius:50%;background:#1a1a1a center/cover no-repeat;border:2px solid var(--line);flex:none}
+.lrow .file{flex:1;padding:10px 8px}
+.bar.one{grid-template-columns:1fr}
+.bar:not(.one){grid-template-columns:1fr 1fr}
+.stack{display:grid;gap:12px}
+.items{display:grid;gap:8px;max-height:50vh;overflow:auto}
+.item{text-align:left;font-weight:700;font-size:14px}
+.copy{color:var(--mut);font-size:11px;text-align:center;margin:6px 4px 0}
+.stage,#cv{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+body{-webkit-touch-callout:none}
+@media print{body{display:none!important}}

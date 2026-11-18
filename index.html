@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="ta">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#e0314b">
+<meta name="robots" content="noindex,nofollow">
+<title>தீக்கதிர் – செய்தி அட்டை</title>
+<link rel="icon" href="logo.png" type="image/png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Tamil:wght@500;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<main id="app">
+  <header class="top">
+    <b>செய்தி அட்டை</b>
+    <span class="sp"></span>
+    <button id="bAdmin" class="ic" type="button">Admin</button>
+  </header>
+
+  <nav id="tabs" class="tabs" aria-label="Templates"></nav>
+  <div class="stage"><canvas id="cv" aria-label="Card preview"></canvas></div>
+  <p class="hint">Drag a photo on the card to move it · pinch or use the slider to zoom</p>
+
+  <section class="panel">
+    <div id="fields"></div>
+    <div id="slots" class="slots"></div>
+    <div id="zoomRow" class="zoom" hidden><span>Zoom</span><input id="zoom" type="range" min="1" max="4" step="0.01" value="1"></div>
+  </section>
+
+  <div id="barPub" class="bar one"><button id="bSub" class="pri" type="button">Submit</button></div>
+  <div id="barAdm" class="bar" hidden>
+    <button id="bSave" class="pri" type="button">Save correction</button>
+    <button id="bDl" class="alt" type="button">⬇ Download</button>
+    <button id="bDel" class="alt" type="button">Delete</button>
+    <button id="bBack" class="alt" type="button">← List</button>
+  </div>
+  <p id="msg" class="msg" role="status"></p>
+  <p class="copy">© தீக்கதிர். எல்லா உரிமைகளும் பாதுகாக்கப்பட்டவை. அனுமதியின்றி நகலெடுத்தல், ஸ்க்ரீன்ஷாட் எடுத்தல், மறுபயன்பாடு தடை செய்யப்படுகிறது.</p>
+</main>
+
+<div id="adm" class="ov" hidden>
+  <div class="card">
+    <h2>Admin</h2>
+    <form id="alogin" class="stack">
+      <label>Password<input id="apw" type="password" autocomplete="current-password" required></label>
+      <button class="pri" type="submit">Enter</button>
+      <button id="aClose" class="alt" type="button">Close</button>
+    </form>
+    <div id="alist" class="stack" hidden>
+      <p class="sub">Submitted cards — tap one to correct, save or download.</p>
+      <div id="items" class="items"></div>
+      <div class="row2">
+        <button id="aRefresh" class="alt" type="button">Refresh</button>
+        <button id="aOut" class="alt" type="button">Sign out</button>
+        <button id="aClose2" class="alt" type="button">Close</button>
+      </div>
+    </div>
+    <p id="am" class="err" role="alert"></p>
+  </div>
+</div>
+
+<script src="config.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
