@@ -282,7 +282,7 @@
   $('#aClose').onclick = $('#aClose2').onclick = function () { $('#adm').hidden = true; };
   $('#aRefresh').onclick = loadList;
   $('#aOut').onclick = function () { PW = ''; ses(''); $('#adm').hidden = true; };
-  $('#alf').addEventListener('submit', function (e) { e.preventDefault(); PW = $('#apw').value; loadList(); });
+  $('#alogin').addEventListener('submit', function (e) { e.preventDefault(); PW = $('#apw').value; loadList(); });
   function mode(on) { admin = on; $('#barPub').hidden = on; $('#barAdm').hidden = !on; draw(); }
   function openItem(id) {
     api({ action: 'get', password: PW, id: id }).then(function (r) {
